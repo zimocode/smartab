@@ -2,7 +2,7 @@
 	"manifest_version":2,
 	"name":"smarTab Homepage",
 	"short_name":"smarTab",
-	"version": "0.0.0.5",
+	"version": "0.0.0.7",
 	"description": "home page extension",
 	"icons": {
 		"16": "icon.png",
@@ -19,5 +19,5 @@
 	"chrome_url_overrides" : {
 		"newtab": "html/home.html"
 	},
-	"permissions": ["topSites","<all_urls>"]
+	"permissions": ["topSites","chrome://favicon/*","*://*.bing.com/*","*://*.zimoapps.com/*","*://www.google.com/s2/*"]
 }

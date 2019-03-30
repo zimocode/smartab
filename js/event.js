@@ -11,7 +11,7 @@ var config={};
 let devMode,
 	extDisable=false,
 	appType={},
-	extID="{77b19bb0-313b-49c8-9e58-cef2e4ebf317}";
+	extID="bgjfekefhjemchdeigphccilhncnjldn";
 	
 
 //check browser

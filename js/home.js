@@ -10,6 +10,9 @@ if(browserType!="cr"){
 	chrome=browser;
 }
 let st={
+	CONS:{
+		lastURL:""
+	},
 	init:function(){
 		this.initHandle();
 		this.setBingImage();
@@ -22,10 +25,10 @@ let st={
 	handleEvent:function(e){
 		switch(e.type){
 			case"DOMContentLoaded":
-				console.log("DOMContentLoaded");
+				//console.log("DOMContentLoaded");
 				break;
 			case"resize":
-				console.log("resize");
+				//console.log("resize");
 				break;
 		}
 	},
@@ -34,7 +37,7 @@ let st={
 		return new Promise(function(resolve,reject){
 			let xhr=new XMLHttpRequest();
 			xhr.open(method,url);
-			console.log(xhr);
+			//console.log(xhr);
 			xhr.onreadystatechange=function(){
 				if(xhr.readyState==4){
 					resolve(xhr.responseXML);
@@ -52,13 +55,33 @@ let st={
 				copyrightString:responseXML.querySelector("images>image>copyright").innerHTML,
 				copyrightURL:responseXML.querySelector("images>image>copyrightlink").innerHTML
 			}
-			st.xhrImage(data);
-		}).catch(function(){
-			console.log("error")
+			if(st.CONS.lastURL!=data.imageURL){
+				st.xhrImage(data);
+			}
+			//st.xhrImage(data);
+		}).catch(function(err){
+			console.log(err)
 		});
 	},
+	xhrImage:function(data){
+		var xhr = new XMLHttpRequest();
+		xhr.responseType="blob";
+		xhr.onreadystatechange=function(){
+			if (xhr.readyState == 4){
+				//console.log(xhr.response);
+				var reader = new FileReader();
+				reader.readAsDataURL(xhr.response); 
+				reader.onloadend = function(){
+					data.base64=reader.result;
+					st.DBsave("put",data);
+				}
+			}
+		}
+		xhr.open('GET',data.imageURL, true);
+		xhr.send();
+	},
 	DBsave:function(method/*get or put*/,data){
-		console.log("data");
+		//console.log("data");
 		let request = indexedDB.open("st", 1),
 			db;
 		let setData=function(db){
@@ -74,7 +97,6 @@ let st={
 				});
 				setImage(data);
 			}
-
 			let get=function(db){
 				let dbobj=db.transaction(["bg"], "readwrite").objectStore("bg");
 				let dbget=dbobj.get(0);
@@ -85,6 +107,7 @@ let st={
 						copyrightString:e.target.result.copyrightString,
 						copyrightURL:e.target.result.copyrightURL
 					}
+					st.CONS.lastURL=e.target.result.url;
 					setImage(data);
 				}
 			}
@@ -106,27 +129,10 @@ let st={
 			};
 		};
 		request.onsuccess=function(e){
-			console.log("onsuccess");
+			//console.log("onsuccess");
 			db=e.target.result;
 			setData(db)
 		}
-	},
-	xhrImage:function(data){
-		var xhr = new XMLHttpRequest();
-		xhr.responseType="blob";
-		xhr.onreadystatechange=function(){
-			if (xhr.readyState == 4){
-				console.log(xhr.response);
-				var reader = new FileReader();
-				reader.readAsDataURL(xhr.response); 
-				reader.onloadend = function(){
-					data.base64=reader.result;
-					st.DBsave("put",data);
-				}
-			}
-		}
-		xhr.open('GET',data.imageURL, true);
-		xhr.send();
 	},
 	setList:function(){
 		let dombox=document.querySelector("homelist>ul"),
